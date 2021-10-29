@@ -1,4 +1,16 @@
+from django.core.exceptions import ValidationError
+from django.core.files.images import get_image_dimensions
 from django.db import models
+
+MAX_IMAGE_SIZE = 2
+IMAGE_WIDTH = 600
+IMAGE_HEIGHT = 600
+
+
+def validate_image(obj):
+    filesize = obj.file.size
+    if filesize > MAX_IMAGE_SIZE * 1024 * 1024:
+        raise ValidationError(f"Max file size is {MAX_IMAGE_SIZE} MB")
 
 
 def calc_cart(cart):

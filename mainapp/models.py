@@ -1,8 +1,13 @@
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+
+from mainapp.utils import MAX_IMAGE_SIZE, IMAGE_HEIGHT, IMAGE_WIDTH, validate_image
 
 
 class Category(models.Model):
@@ -11,11 +16,36 @@ class Category(models.Model):
         verbose_name_plural = "Категории"
 
     name = models.CharField(max_length=255, verbose_name='Имя категории')
-    image = models.ImageField(blank=True)
+    image = models.ImageField(blank=True, validators=[validate_image],
+                              help_text=f'Maximum image size allowed is {MAX_IMAGE_SIZE}.'
+                                        f'Upload images {IMAGE_WIDTH}x{IMAGE_HEIGHT} pixels',
+                              upload_to='category/%Y/')
     slug = models.SlugField(unique=True)
 
     def get_absolute_url(self):
         return reverse('category_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            img = Image.open(self.image)
+            resized = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
+            new_image_io = BytesIO()
+
+            if img.format == 'JPEG':
+                resized.save(new_image_io, format='JPEG')
+            elif img.format == 'PNG':
+                resized.save(new_image_io, format='PNG')
+
+            temp_name = self.image.name
+            self.image.delete(save=False)
+
+            self.image.save(
+                temp_name,
+                content=ContentFile(new_image_io.getvalue()),
+                save=False
+            )
+
+        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -31,7 +61,10 @@ class Product(models.Model):
     title = models.CharField(max_length=255, verbose_name='Наименование')
     slug = models.SlugField(unique=True)
     content = models.TextField(verbose_name='Описание', null=True)
-    image = models.ImageField(blank=True)
+    image = models.ImageField(blank=True, validators=[validate_image],
+                              help_text=f'Maximum image size allowed is {MAX_IMAGE_SIZE}.'
+                                        f'Upload images {IMAGE_WIDTH}x{IMAGE_HEIGHT} pixels',
+                              upload_to='product/%Y/')
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
 
     def __str__(self):
