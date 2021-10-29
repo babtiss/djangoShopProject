@@ -1,0 +1,126 @@
+{% extends 'mainapp/layout.html' %}
+{% load crispy_forms_filters %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block section %}
+    <h3 class="px-4 px-lg-5 mt-5"> Заказы пользователя {{ request.user.username }}</h3>
+    {% if not orders %}
+        <div class="col-md-12" style="margin-top: 200px; margin-bottom: 200px">
+            <h3> Нет активных заказов. <a href="{% url 'mainapp_home' %}">Вернуться</a></h3>
+        </div>
+    {% else %}
+        <div class="row row-cols-xl-2 justify-content-center" style="margin-top: 100px; margin-bottom: 100px">
+            <table class="table">
+                <thead>
+                <th scope="col">Номер</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Сумма</th>
+                <th scope="col">Товар</th>
+                <th scope="col">Дополнительно</th>
+                </thead>
+                <tbody>
+
+                {% for num,order in orders %}
+                    <tr>
+                        <th scope="row">{{ num }}</th>
+                        <td>{{ order.get_status_display }}</td>
+                        <td>{{ order.cart.final_price }}</td>
+                        <td>
+                            <ul>
+                                {% for item in order.cart.products.all %}
+                                    <li>{{ item.product.title }} x {{ item.qty }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-primary" data-toggle="modal"
+                                    data-target="#Modal-{{ order.id }}">
+                                Подробнее
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="Modal-{{ order.id }}" tabindex="-1" role="dialog"
+                                 aria-labelledby="ModalLabel"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="ModalLabel">Подробности заказа</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <h4 class="text-center">Товар</h4>
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Наименование</th>
+                                                    <th scope="col">Изображение</th>
+                                                    <th scope="col">Цена</th>
+                                                    <th scope="col">Количество</th>
+                                                    <th scope="col">Общая цена</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for item in order.cart.products.all %}
+                                                    <tr>
+                                                        <th scope="row"><a
+                                                                href="{{ item.product.get_absolute_url }}"
+                                                                class="text-decoration-none text-dark"> {{ item.product.title }}</a>
+                                                        </th>
+                                                        {% if item.product.image %}
+                                                            <td class="w-25"><a
+                                                                    href="{{ item.product.get_absolute_url }}"><img
+                                                                    src="{{ item.product.image.url }}"
+                                                                    width="200"></a>
+                                                            </td>
+                                                        {% else %}
+                                                            <td class="w-25"></td>
+                                                        {% endif %}
+
+                                                        <th scope="row"> {{ item.product.price }} руб.</th>
+                                                        <th scope="row"> {{ item.qty }}</th>
+                                                        <th scope="row"> {{ item.final_price }} руб.</th>
+                                                    </tr>
+                                                {% endfor %}
+                                                <tr>
+                                                    <td colspan="2"></td>
+                                                    <th scope="row">Итого:</th>
+                                                    <th scope="row">{{ order.cart.number_of_products }}</th>
+                                                    <th scope="row">{{ order.cart.final_price }} руб.</th>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            <table class="table">
+                                                <hr>
+                                                <h4 class="text-center"> Дополнительная информация </h4>
+                                                <p>Имя: <strong>{{ order.first_name }}</strong></p>
+                                                <p>Фамилия: <strong>{{ order.last_name }}</strong></p>
+                                                <p>Телефон: <strong>{{ order.phone }}</strong></p>
+                                                {% if order.buying_type == 'delivery' %}
+                                                    <p>Адрес: <strong>{{ order.address }}</strong></p>
+                                                {% endif %}
+                                                <p>Комментарий к заказу: <strong>{{ order.comment }}</strong></p>
+                                            </table>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary">Ok</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+    {% endif %}
+
+{% endblock %}

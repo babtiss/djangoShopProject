@@ -1,0 +1,71 @@
+{% extends 'mainapp/layout.html' %}
+{% load static %}
+
+
+{% block header %}
+{% endblock %}
+{% block section %}
+    <section class="py-2 min-vh-100">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 align-items-center">
+                <h3 class="text-center mt-5 mb-5"> Ваша корзина {% if not cart.products.count %} пуста {% endif %} </h3>
+                {% if cart.products.count %}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Наименование</th>
+                            <th scope="col">Изображение</th>
+                            <th scope="col">Цена</th>
+                            <th scope="col">Количество</th>
+                            <th scope="col">Общая цена</th>
+                            <th scope="col"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in cart.products.all %}
+                            <tr>
+                                <th scope="row"><a
+                                        href="{{ item.product.get_absolute_url }}"
+                                        class="text-decoration-none text-dark"> {{ item.product.title }}</a></th>
+                                {% if item.product.image %}
+                                    <td class="w-25"><a href="{{ item.product.get_absolute_url }}"><img
+                                            src="{{ item.product.image.url }}"
+                                            width="200"></a>
+                                    </td>
+                                {% else %}
+                                    <td class="w-25"></td>
+                                {% endif %}
+
+                                <th scope="row"> {{ item.product.price }} руб.</th>
+                                <th scope="row">
+                                    <form action="{% url 'change_qty_in_cart' slug=item.product.slug %}"
+                                          method="POST">
+                                        {% csrf_token %}
+                                        <input type="number" class="form-control" name="qty" min="1"
+                                               value="{{ item.qty }}">
+                                        <input type="submit" class="btn btn-primary" value="изменить кол-во">
+                                    </form>
+                                </th>
+                                <th scope="row"> {{ item.final_price }} руб.</th>
+                                <th scope="row"><a
+                                        href="{% url 'delete_from_cart' slug=item.product.slug %}">x</a>
+                                </th>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="2"></td>
+                            <th scope="row">Итого:</th>
+                            <th scope="row">{{ cart.number_of_products }}</th>
+                            <th scope="row">{{ cart.final_price }} руб.</th>
+                            <td scope="row"><a href="{% url 'checkout' %}">
+                                <button class="btn btn-primary">Оформить заказ</button>
+                            </a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

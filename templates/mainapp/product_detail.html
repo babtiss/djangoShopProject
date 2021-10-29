@@ -1,0 +1,48 @@
+{% extends 'mainapp/layout.html' %}
+{% load information %}
+
+{% block header %}
+{% endblock %}
+
+{% block section %}
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="row gx-4 gx-lg-5 align-items-center my-5">
+                <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="{{ product.image.url }}" alt=""/>
+                </div>
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bolder">{{ product.title }}</h1>
+                    <p class="lead">{{ product.content }}</p>
+                    <div class="fs-5 mb-3">
+                        <h4 class="text-decoration-line-through">{{ product.price }} руб.</h4>
+                    </div>
+                    <div class="d-flex">
+                        {% if product_in_cart %}
+                            <a href="{% url 'delete_from_cart' slug=product.slug %}">
+                                <button class="btn btn-dark" type="button">
+                                    <i class="bi bi-check2"></i>
+                                    Добавлено в корзину
+                                </button>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'add_to_cart' slug=product.slug %}">
+                                <button class="btn btn-outline-dark flex-shrink-0" type="button">
+                                    <i class="bi-cart-fill me-1"></i>
+                                    Добавить в корзину
+                                </button>
+                            </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            <!-- Item info -->
+
+        </div>
+    </section>
+
+    <!-- Related items section-->
+
+
+
+{% endblock section %}

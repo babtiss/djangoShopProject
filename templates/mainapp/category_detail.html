@@ -1,0 +1,49 @@
+{% extends 'mainapp/layout.html' %}
+{% load information %}
+
+{% block header %}
+{% endblock %}
+{% block section %}
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 mt-5">
+            <h1 class="display-5 fw-bolder"> {{ category.name }} </h1>
+            <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+                {% block cards %}
+                    {% for product in products %}
+                        <div class="col mb-5">
+                            <div class="card h-100">
+                                <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark">
+                                    {% if product.image %}
+                                        <img class="card-img-top" src="{{ product.image.url }}"/>
+                                    {% else %}
+                                        <img class="card-img-top" src=""/>
+                                    {% endif %}
+                                    <!-- Product details-->
+                                    <div class="card-body p-4">
+                                        <div class="text-center">
+                                            <!-- Product name-->
+                                            <h5 class="fw-bolder">{{ product.title }}</h5>
+
+                                            <!-- Product reviews-->
+                                            <div class="d-flex justify-content-center small text-warning mb-2">
+                                                {% for i in '*****' %}
+                                                    <div class="bi-star-fill"></div>
+                                                {% endfor %}
+                                            </div>
+                                            <!-- Product price-->
+                                            {{ product.price }} руб.
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endblock cards %}
+
+
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
