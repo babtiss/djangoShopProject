@@ -6,13 +6,13 @@ from django.http import HttpResponseRedirect
 
 from mainapp.forms import OrderForm, LoginForm, RegistrationForm
 from mainapp.mixins import *
+from mainapp.utils import calc_cart
 
 
-class BaseView(NavbarMixin, View):
+class BaseView(CustomerAndCartMixin, View):
 
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
-
         data = {
             'categories': categories,
             'cart': self.cart,
@@ -21,7 +21,7 @@ class BaseView(NavbarMixin, View):
         return render(request, 'mainapp/layout.html', data)
 
 
-class ProductDetailView(NavbarMixin, DetailView):
+class ProductDetailView(CustomerAndCartMixin, DetailView):
     slug_url_kwarg = 'slug'
     model = Product
     context_object_name = 'product'
@@ -39,7 +39,7 @@ class ProductDetailView(NavbarMixin, DetailView):
         return context
 
 
-class CategoryDetailView(NavbarMixin, DetailView):
+class CategoryDetailView(CustomerAndCartMixin, DetailView):
     slug_url_kwarg = 'slug'
     template_name = 'mainapp/category_detail.html'
     model = Category
@@ -53,7 +53,7 @@ class CategoryDetailView(NavbarMixin, DetailView):
         return context
 
 
-class CartView(NavbarMixin, View):
+class CartView(CustomerAndCartMixin, View):
 
     def get(self, request, *args, **kwargs):
         data = {
@@ -64,7 +64,7 @@ class CartView(NavbarMixin, View):
         return render(request, 'mainapp/cart.html', data)
 
 
-class AddToCartView(NavbarMixin, View):
+class AddToCartView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
         product_slug = kwargs.get('slug')
         product = Product.objects.get(slug=product_slug)
@@ -78,7 +78,7 @@ class AddToCartView(NavbarMixin, View):
         return HttpResponseRedirect(reverse('products_detail', args=(slug,)))
 
 
-class DeleteFromCartView(NavbarMixin, View):
+class DeleteFromCartView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
         product_slug = kwargs.get('slug')
         product = Product.objects.get(slug=product_slug)
@@ -91,7 +91,7 @@ class DeleteFromCartView(NavbarMixin, View):
         return HttpResponseRedirect('/cart/')
 
 
-class ChangeQtyView(NavbarMixin, View):
+class ChangeQtyView(CustomerAndCartMixin, View):
 
     def post(self, request, *args, **kwargs):
         qty = request.POST.get('qty')
@@ -106,7 +106,7 @@ class ChangeQtyView(NavbarMixin, View):
         return HttpResponseRedirect('/cart/')
 
 
-class CheckoutView(NavbarMixin, View):
+class CheckoutView(CustomerAndCartMixin, View):
 
     def get(self, request, *args, **kwargs):
         customer = Customer.objects.get(user=request.user)
@@ -119,7 +119,7 @@ class CheckoutView(NavbarMixin, View):
         return render(request, 'mainapp/checkout.html', data)
 
 
-class MakeOrderView(NavbarMixin, View):
+class MakeOrderView(CustomerAndCartMixin, View):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -143,7 +143,7 @@ class MakeOrderView(NavbarMixin, View):
         return HttpResponseRedirect('/checkout/')
 
 
-class LoginView(NavbarMixin, View):
+class LoginView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
         form = LoginForm(request.POST or None)
         data = {
@@ -172,7 +172,7 @@ class LoginView(NavbarMixin, View):
         return render(request, 'mainapp/login.html', data)
 
 
-class RegistrationView(NavbarMixin, View):
+class RegistrationView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
         form = RegistrationForm(request.POST or None)
         data = {
@@ -211,7 +211,7 @@ class RegistrationView(NavbarMixin, View):
         return render(request, 'mainapp/registration.html', data)
 
 
-class ProfileView(NavbarMixin, View):
+class ProfileView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
         orders = Order.objects.filter(customer=self.customer).order_by('-created_date')
         data = {

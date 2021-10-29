@@ -3,7 +3,7 @@ from django.views.generic import View
 from mainapp.models import *
 
 
-class NavbarMixin(View):
+class CustomerAndCartMixin(View):
 
     def dispatch(self, request, *args, **kwargs):
         cart = None
@@ -15,7 +15,7 @@ class NavbarMixin(View):
             cart = Cart.objects.filter(owner=customer, in_order=False).first()
             if not cart:
                 cart = Cart.objects.create(owner=customer, final_price=0, number_of_products=0)
-        self.categories = Category.objects.all()
         self.cart = cart
         self.customer = customer
+        self.categories = Category.objects.all()
         return super().dispatch(request, *args, **kwargs)
