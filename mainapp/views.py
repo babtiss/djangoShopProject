@@ -66,29 +66,32 @@ class CartView(CustomerAndCartMixin, View):
 
 class AddToCartView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
-        product_slug = kwargs.get('slug')
-        product = Product.objects.get(slug=product_slug)
+        slug = kwargs.get('slug')
+        product = Product.objects.get(slug=slug)
         cart_product, created = CartProduct.objects.get_or_create(
             owner=self.cart.owner, cart=self.cart, product=product
         )
         if created:
             self.cart.products.add(cart_product)
             calc_cart(self.cart)
-        slug = kwargs['slug']
+
         return HttpResponseRedirect(reverse('products_detail', args=(slug,)))
 
 
 class DeleteFromCartView(CustomerAndCartMixin, View):
     def get(self, request, *args, **kwargs):
-        product_slug = kwargs.get('slug')
-        product = Product.objects.get(slug=product_slug)
+        slug = kwargs.get('slug')
+        product = Product.objects.get(slug=slug)
         cart_product = CartProduct.objects.get(
             owner=self.cart.owner, cart=self.cart, product=product
         )
         self.cart.products.remove(cart_product)
         cart_product.delete()
         calc_cart(self.cart)
-        return HttpResponseRedirect('/cart/')
+        if '/cart/' in request.META.get('HTTP_REFERER'):
+            return HttpResponseRedirect('/cart/')
+        else:
+            return HttpResponseRedirect(reverse('products_detail', args=(slug,)))
 
 
 class ChangeQtyView(CustomerAndCartMixin, View):
