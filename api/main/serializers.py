@@ -16,7 +16,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CustomCategorySerializer(CategorySerializer):
+class GetProductOfCategorySerializer(CategorySerializer):
     products = serializers.SerializerMethodField()
 
     @staticmethod
