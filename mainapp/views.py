@@ -3,6 +3,7 @@ from django.db import transaction
 from django.shortcuts import render
 from django.views.generic import DetailView
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 
 from mainapp.forms import OrderForm, LoginForm, RegistrationForm
 from mainapp.mixins import *
@@ -64,47 +65,35 @@ class CartView(CustomerAndCartMixin, View):
         return render(request, 'mainapp/cart.html', data)
 
 
-class AddToCartView(CustomerAndCartMixin, View):
+class AddToCartView(CartProductMixin, View):
+
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
-        product = Product.objects.get(slug=slug)
-        cart_product, created = CartProduct.objects.get_or_create(
-            owner=self.cart.owner, cart=self.cart, product=product
-        )
-        if created:
-            self.cart.products.add(cart_product)
+        if self.created:
+            self.cart.products.add(self.cart_product)
             calc_cart(self.cart)
 
         return HttpResponseRedirect(reverse('products_detail', args=(slug,)))
 
 
-class DeleteFromCartView(CustomerAndCartMixin, View):
+class DeleteFromCartView(CartProductMixin, View):
+
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        product = Product.objects.get(slug=slug)
-        cart_product = CartProduct.objects.get(
-            owner=self.cart.owner, cart=self.cart, product=product
-        )
-        self.cart.products.remove(cart_product)
-        cart_product.delete()
+        self.cart.products.remove(self.cart_product)
+        self.cart_product.delete()
         calc_cart(self.cart)
         if '/cart/' in request.META.get('HTTP_REFERER'):
             return HttpResponseRedirect('/cart/')
         else:
-            return HttpResponseRedirect(reverse('products_detail', args=(slug,)))
+            return HttpResponseRedirect(reverse('products_detail', args=(self.slug,)))
 
 
-class ChangeQtyView(CustomerAndCartMixin, View):
+class ChangeQtyView(CartProductMixin, View):
 
     def post(self, request, *args, **kwargs):
         qty = request.POST.get('qty')
-        product_slug = kwargs.get('slug')
-        product = Product.objects.get(slug=product_slug)
-        cart_product = CartProduct.objects.get(
-            owner=self.cart.owner, cart=self.cart, product=product
-        )
-        cart_product.qty = int(qty)
-        cart_product.save()
+        self.cart_product.qty = int(qty)
+        self.cart_product.save()
         calc_cart(self.cart)
         return HttpResponseRedirect('/cart/')
 
