@@ -1,25 +1,23 @@
 from django.contrib.auth import authenticate, login
 from django.db import transaction
 from django.shortcuts import render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from django.http import HttpResponseRedirect
-from django.contrib import messages
-
 from mainapp.forms import OrderForm, LoginForm, RegistrationForm
 from mainapp.mixins import *
 from mainapp.utils import calc_cart
 
 
-class BaseView(CustomerAndCartMixin, View):
+class BaseView(CustomerAndCartMixin, ListView):
+    paginate_by = 4
+    queryset = Category.objects.all()
+    template_name = 'mainapp/layout.html'
+    context_object_name = 'categories'
 
-    def get(self, request, *args, **kwargs):
-        categories = Category.objects.all()
-        data = {
-            'categories': categories,
-            'cart': self.cart,
-        }
-
-        return render(request, 'mainapp/layout.html', data)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cart'] = self.cart
+        return context
 
 
 class ProductDetailView(CustomerAndCartMixin, DetailView):
