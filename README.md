@@ -1,10 +1,6 @@
 #### **Django shop project**
 **The repository with the project was created to improve my skill in django-framework, django-rest-framework.**
 
-Build and start project:
-
-    docker-compose build
-    docker-compose up 
     
 The project is planned to be supplemented:
 
