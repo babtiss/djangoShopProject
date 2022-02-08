@@ -1,4 +1,4 @@
-#### **Django shop project**
+# **Django shop project**
 **The repository with the project was created to improve my skill in django-framework, django-rest-framework.**
 
     
